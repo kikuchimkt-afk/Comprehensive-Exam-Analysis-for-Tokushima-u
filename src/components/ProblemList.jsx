@@ -20,12 +20,22 @@ const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
 
     useEffect(() => {
         const init = async () => {
-            // Try to sync with repo data first
+            // In production, we always try to sync with the latest data from the server (JSON)
+            // In development, we also try, but it's less critical if we are testing local changes.
+            const isProd = import.meta.env.PROD;
+            // const isProd = true; // TEMP: Forcing true to verify logic in dev
+
             try {
+                if (isProd) {
+                    console.log('Production environment detected. Syncing with initialData.json...');
+                }
                 const { syncWithRepo } = await import('../utils/db');
-                await syncWithRepo();
+                const count = await syncWithRepo();
+                if (isProd && count > 0) {
+                    console.log(`Synced ${count} items from server.`);
+                }
             } catch (e) {
-                console.log('No repository data to sync or sync failed', e);
+                console.log('Sync failed or no data found', e);
             }
             fetchProblems();
         };
