@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { Printer, Upload, Layout, List, Plus } from 'lucide-react';
+import { Printer, Upload, Layout, List, Plus, Download } from 'lucide-react';
 import UploadSection from './components/UploadSection';
 import PrintLayout from './components/PrintLayout';
 import ProblemList from './components/ProblemList';
 import ProblemRegister from './components/ProblemRegister';
 import InstructorModal from './components/InstructorModal';
-import { getProblem } from './utils/db'; // Import this
+import { getProblem, exportDB, importDB } from './utils/db'; // Import this
 import { useReactToPrint } from 'react-to-print';
 
 function App() {
@@ -218,6 +218,49 @@ function App() {
           </div>
 
           <div className="flex gap-4">
+            {viewMode === 'list' && (
+              <>
+                <button
+                  onClick={() => exportDB()}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap text-sm"
+                  title="Backup Data"
+                >
+                  <Download className="w-4 h-4" />
+                  Backup Data
+                </button>
+                <label className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap cursor-pointer text-sm">
+                  <Upload className="w-4 h-4" />
+                  Restore Data
+                  <input
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={async (e) => {
+                      if (e.target.files?.[0]) {
+                        if (window.confirm('Are you sure you want to overwrite/merge with this data?')) {
+                          try {
+                            const count = await importDB(e.target.files[0]);
+                            alert(`${count} items restored.`);
+                            window.location.reload();
+                          } catch (error) {
+                            console.error(error);
+                            alert('Failed to restore.');
+                          }
+                        }
+                      }
+                    }}
+                  />
+                </label>
+                <button
+                  onClick={handleRegisterNew}
+                  className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm whitespace-nowrap text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Register New
+                </button>
+              </>
+            )}
+
             {viewMode === 'editor' && (
               <>
                 <button

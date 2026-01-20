@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Search, FileText, Calendar, BookOpen, Trash2, Edit, Languages, Download, Upload } from 'lucide-react';
-import { getAllProblems, deleteProblem, exportDB, importDB } from '../utils/db';
+import { Search, FileText, Calendar, BookOpen, Trash2, Edit, Languages } from 'lucide-react';
+import { getAllProblems, deleteProblem } from '../utils/db';
 
 const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
     const [problems, setProblems] = useState([]);
@@ -20,23 +20,18 @@ const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
 
     useEffect(() => {
         const init = async () => {
-            // In production, we always try to sync with the latest data from the server (JSON)
-            // In development, we also try, but it's less critical if we are testing local changes.
-            const isProd = import.meta.env.PROD;
-            // const isProd = true; // TEMP: Forcing true to verify logic in dev
-
             try {
-                if (isProd) {
-                    console.log('Production environment detected. Syncing with initialData.json...');
-                }
-                const { syncWithRepo } = await import('../utils/db');
-                const count = await syncWithRepo();
-                if (isProd && count > 0) {
-                    console.log(`Synced ${count} items from server.`);
+                // Check if we already have data
+                const existing = await getAllProblems();
+                if (existing.length === 0) {
+                    console.log('Database empty. Attempting to load initial data...');
+                    const { syncWithRepo } = await import('../utils/db');
+                    await syncWithRepo();
                 }
             } catch (e) {
-                console.log('Sync failed or no data found', e);
+                console.error('Initialization failed:', e);
             }
+            // Always fetch problems to update state (either existing or newly synced)
             fetchProblems();
         };
         init();
@@ -104,46 +99,6 @@ const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
                 >
                     <BookOpen className="w-5 h-5" />
                     講師の皆様へ
-                </button>
-                <button
-                    onClick={() => {
-                        exportDB();
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
-                    title="開発時や移行時にデータを保存します"
-                >
-                    <Download className="w-5 h-5" />
-                    Backup Data
-                </button>
-                <label className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap cursor-pointer">
-                    <Upload className="w-5 h-5" />
-                    Restore Data
-                    <input
-                        type="file"
-                        accept=".json"
-                        className="hidden"
-                        onChange={async (e) => {
-                            if (e.target.files?.[0]) {
-                                if (window.confirm('現在のデータを上書き・追加してもよろしいですか？')) {
-                                    try {
-                                        const count = await importDB(e.target.files[0]);
-                                        alert(`${count}件のデータを復元しました。`);
-                                        window.location.reload();
-                                    } catch (error) {
-                                        console.error(error);
-                                        alert('復元に失敗しました。');
-                                    }
-                                }
-                            }
-                        }}
-                    />
-                </label>
-                <button
-                    onClick={onRegisterNew}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm whitespace-nowrap"
-                >
-                    <Plus className="w-5 h-5" />
-                    Register New
                 </button>
             </div>
 
