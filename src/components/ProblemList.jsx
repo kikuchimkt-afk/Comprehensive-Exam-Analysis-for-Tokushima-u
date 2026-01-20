@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Search, FileText, Calendar, BookOpen, Trash2, Edit, Languages } from 'lucide-react';
-import { getAllProblems, deleteProblem } from '../utils/db';
+import { Plus, Search, FileText, Calendar, BookOpen, Trash2, Edit, Languages, Download, Upload } from 'lucide-react';
+import { getAllProblems, deleteProblem, exportDB, importDB } from '../utils/db';
 
 const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
     const [problems, setProblems] = useState([]);
@@ -19,7 +19,17 @@ const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
     };
 
     useEffect(() => {
-        fetchProblems();
+        const init = async () => {
+            // Try to sync with repo data first
+            try {
+                const { syncWithRepo } = await import('../utils/db');
+                await syncWithRepo();
+            } catch (e) {
+                console.log('No repository data to sync or sync failed', e);
+            }
+            fetchProblems();
+        };
+        init();
     }, []);
 
     const handleDelete = async (e, id) => {
@@ -85,6 +95,39 @@ const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
                     <BookOpen className="w-5 h-5" />
                     講師の皆様へ
                 </button>
+                <button
+                    onClick={() => {
+                        exportDB();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap"
+                    title="開発時や移行時にデータを保存します"
+                >
+                    <Download className="w-5 h-5" />
+                    Backup Data
+                </button>
+                <label className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-sm whitespace-nowrap cursor-pointer">
+                    <Upload className="w-5 h-5" />
+                    Restore Data
+                    <input
+                        type="file"
+                        accept=".json"
+                        className="hidden"
+                        onChange={async (e) => {
+                            if (e.target.files?.[0]) {
+                                if (window.confirm('現在のデータを上書き・追加してもよろしいですか？')) {
+                                    try {
+                                        const count = await importDB(e.target.files[0]);
+                                        alert(`${count}件のデータを復元しました。`);
+                                        window.location.reload();
+                                    } catch (error) {
+                                        console.error(error);
+                                        alert('復元に失敗しました。');
+                                    }
+                                }
+                            }
+                        }}
+                    />
+                </label>
                 <button
                     onClick={onRegisterNew}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm whitespace-nowrap"
