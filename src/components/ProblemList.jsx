@@ -21,17 +21,27 @@ const ProblemList = ({ onSelect, onRegisterNew, onEdit, onShowInstructor }) => {
     useEffect(() => {
         const init = async () => {
             try {
-                // Check if we already have data
+                // In production, always sync with the latest JSON to ensure updates are reflected.
+                // In development, only sync if empty to prevent overwriting local work-in-progress.
+                const isProd = import.meta.env.PROD;
+
                 const existing = await getAllProblems();
-                if (existing.length === 0) {
-                    console.log('Database empty. Attempting to load initial data...');
+                if (existing.length === 0 || isProd) {
+                    if (isProd) {
+                        console.log('Production environment: Syncing with repository data...');
+                    } else {
+                        console.log('Database empty: Loading initial data...');
+                    }
                     const { syncWithRepo } = await import('../utils/db');
-                    await syncWithRepo();
+                    const count = await syncWithRepo();
+                    if (count > 0) {
+                        console.log(`Synced ${count} items.`);
+                    }
                 }
             } catch (e) {
                 console.error('Initialization failed:', e);
             }
-            // Always fetch problems to update state (either existing or newly synced)
+            // Always fetch problems to update state
             fetchProblems();
         };
         init();
