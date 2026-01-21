@@ -42,7 +42,7 @@
     },
     "questionContent": {
       "type": "text",
-      "content": "What made the difference in the results of the South Pole explorations that Amundsen and Scott separately conducted? Answer with one word.\r\n\r\nBefore what specific date did Amundsen arrive at the South Pole according to the writer?\r\n\r\nThe writer provides three contrasting points that show the difference between Amundsen and Scott in their explorations. Explain in full sentences the three points in which the two men's approaches differed."
+      "content": "1. What made the difference in the results of the South Pole explorations that Amundsen and Scott separately conducted? Answer with one word.\n\n2. Before what specific date did Amundsen arrive at the South Pole according to the writer?\n\n3. The writer provides three contrasting points that show the difference between Amundsen and Scott in their explorations. Explain in full sentences the three points in which the two men's approaches differed."
     },
     "explanationContent": {
       "type": "text",
@@ -63,7 +63,8 @@
     "passageTitleEn": "The Power of Planning: Why Amundsen Succeeded",
     "passageTitleJa": "計画の力：なぜアムンゼンは成功したのか",
     "createdAt": "2026-01-21T05:41:14.170Z",
-    "id": 16
+    "id": 16,
+    "updatedAt": "2026-01-21T06:17:59.816Z"
   },
   {
     "title": "徳島大学2021年大問１",
